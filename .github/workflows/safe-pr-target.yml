@@ -34,7 +34,7 @@ jobs:
               env:
                 LINTING_TOOL_API_KEY: ${{ secrets.LINTING_TOOL_API_KEY }}
               run: |
-                echo "tainted=$(npm run lint --workspace trusted --ignore-scripts ../untrusted/)" >> $GITHUB_OUTPUT
+                echo "tainted=$(npm run lint --ignore-scripts $GITHUB_WORKSPACE/untrusted/)" >> $GITHUB_OUTPUT
             - name: Output linting results to Pull Request
               uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
               env:
