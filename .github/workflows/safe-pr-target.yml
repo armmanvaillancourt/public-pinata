@@ -1,0 +1,50 @@
+on:
+    pull_request_target:
+        branches: [main]
+        types: [opened, synchronized, labeled]
+permissions: {}
+jobs:
+    lint:
+        runs-on: ubuntu-latest
+        if: github.event.label.name == 'safe-to-run'
+        permissions:
+            contents: read
+            pull-requests: write
+        steps:
+            - name: Checkout trusted code from protected branch
+              uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+              with:
+                ref: main
+                persist-credentials: false
+                path: trusted
+            - name: Install trusted dependencies
+              working-directory: trusted
+              run: npm ci
+
+            - name: Checkout untrusted code
+              uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+              with:
+                repository: ${{ github.event.pull_request.head.repo.full_name }}
+                ref: ${{ github.event.pull_request.head.sha }}
+                persist-credentials: false
+                path: untrusted
+            - name: Run linting script on untrusted code
+              id: untrusted-code-lint
+              working-directory: trusted
+              env:
+                LINTING_TOOL_API_KEY: ${{ secrets.LINTING_TOOL_API_KEY }}
+              run: |
+                echo "tainted=$(npm run lint --workspace trusted --ignore-scripts ../untrusted/)" >> $GITHUB_OUTPUT
+            - name: Output linting results to Pull Request
+              uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+              env:
+                UNTRUSTED_CODE_TAINTED_LINT_RESULTS: ${{ steps.untrusted-code-lint.outputs.tainted }}
+              with:
+                script: |
+                    const { UNTRUSTED_CODE_TAINTED_LINT_RESULTS } = process.env
+                    github.rest.issues.createComment({
+                        issue_number: context.issue.number,
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
+                        body: `👋 Thanks for your contribution.\nHere are the linting results:\n${UNTRUSTED_CODE_TAINTED_LINT_RESULTS}`
+                    })
