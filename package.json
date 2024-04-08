@@ -1,4 +1,6 @@
 {
+  "name": "nodebla",
+  "version": "1.0.0",
   "scripts": {
     "lint": "pwd && ls -lah"
   }
