@@ -1,7 +1,11 @@
 {
-  "name": "nodebla",
+  "name": "public-pinata",
   "version": "1.0.0",
+  "description": "Bla bla",
+  "main": "some.js",
   "scripts": {
-    "lint": "pwd && ls -lah"
-  }
+    "lint": "pwd && ls -lah $1 && exit 1"
+  },
+  "author": "John Doe",
+  "license": "ISC"
 }
