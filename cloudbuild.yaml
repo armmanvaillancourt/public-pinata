@@ -1,0 +1,4 @@
+steps:
+  # Step 1: Run a Hello World script
+  - name: 'alpine'
+    args: ['echo', 'Hello, World!']
